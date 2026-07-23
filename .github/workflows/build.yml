@@ -1,0 +1,58 @@
+name: build-installers
+
+# 手动触发（Actions 页面点 Run workflow），或推送形如 v0.1.0 的 tag 时自动触发。
+# 构建结束后，会在仓库的 Releases 里生成一个「草稿」发布，里面附带：
+#   - macOS 安装包 (.dmg)，Apple Silicon 和 Intel 各一个
+#   - Windows 安装包 (.msi 和 .exe)
+# 打开草稿发布页面即可下载对应安装包，安装到 Mac / Win 电脑上使用。
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
+          - platform: "windows-latest"
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 安装 Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: 安装前端依赖（仅 Tauri CLI）
+        run: npm install
+
+      - name: 生成图标
+        run: npm run icon
+
+      - name: 构建并发布安装包
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }}
+          tagName: app-v__VERSION__
+          releaseName: "任务看板 v__VERSION__"
+          releaseBody: "自动构建的安装包，在下方 Assets 中下载对应系统的安装文件。"
+          releaseDraft: true
+          prerelease: false
