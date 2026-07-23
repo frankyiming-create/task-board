@@ -153,6 +153,7 @@ async fn run_server() {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .setup(|_app| {
             tauri::async_runtime::spawn(run_server());
             Ok(())
