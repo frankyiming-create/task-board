@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>任务看板</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" href="icons/icon-192.png" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="任务看板" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <h1>任务看板</h1>
+      </div>
+
+      <div class="view-switch" role="tablist" aria-label="视图切换">
+        <button class="switch-btn active" data-view="board" role="tab" aria-selected="true">看板</button>
+        <button class="switch-btn" data-view="gantt" role="tab" aria-selected="false">甘特图</button>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="btn-settings" class="btn-ghost" title="人员 / 状态列设置">设置</button>
+        <button id="btn-new-task" class="btn-primary">+ 新建任务</button>
+      </div>
+    </header>
+
+    <div id="sync-banner" class="sync-banner hidden"></div>
+
+    <main>
+      <!-- 看板视图 -->
+      <section id="view-board" class="view-panel active">
+        <div id="board-columns" class="board-columns"></div>
+      </section>
+
+      <!-- 甘特图视图 -->
+      <section id="view-gantt" class="view-panel">
+        <div class="gantt-toolbar">
+          <button id="gantt-prev" class="btn-ghost small">‹ 上一段</button>
+          <div id="gantt-range-label" class="gantt-range-label"></div>
+          <button id="gantt-next" class="btn-ghost small">下一段 ›</button>
+        </div>
+        <div id="gantt-wrap" class="gantt-wrap">
+          <div id="gantt-chart" class="gantt-chart"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 任务新建/编辑弹窗 -->
+  <div id="task-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="task-modal-title">新建任务</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span class="field-label">标题</span>
+          <input type="text" id="f-title" placeholder="例如：整理季度报告" maxlength="60" />
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">开始日期</span>
+            <input type="date" id="f-start" />
+          </label>
+          <label class="field">
+            <span class="field-label">截止日期</span>
+            <input type="date" id="f-due" />
+          </label>
+        </div>
+
+        <div class="field">
+          <span class="field-label">状态</span>
+          <div id="f-status-group" class="chip-group" data-role="status"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">优先级</span>
+          <div class="chip-group" data-role="priority">
+            <button type="button" class="chip" data-value="low">不急</button>
+            <button type="button" class="chip" data-value="medium">一般</button>
+            <button type="button" class="chip" data-value="high">紧急</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">协作人（勾选，可在设置中添加）</span>
+          <div id="f-people-group" class="checkbox-group"></div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">进展说明（可选，最多 1000 字）</span>
+          <textarea id="f-notes" rows="3" maxlength="1000" placeholder="记录当前任务进展…"></textarea>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-delete-task" class="btn-danger hidden">删除任务</button>
+        <div class="spacer"></div>
+        <button class="btn-ghost" data-close-modal>取消</button>
+        <button id="btn-save-task" class="btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置弹窗：人员 & 状态列 -->
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>设置</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <span class="field-label">协作人名单</span>
+          <div id="people-list" class="tag-list"></div>
+          <div class="inline-add">
+            <input type="text" id="new-person" placeholder="输入姓名后按添加" maxlength="20" />
+            <button id="add-person" class="btn-ghost small">添加</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">看板状态列（顺序即看板列顺序）</span>
+          <div id="columns-list" class="tag-list"></div>
+          <div class="inline-add">
+            <input type="text" id="new-column" placeholder="例如：验收中" maxlength="12" />
+            <button id="add-column" class="btn-ghost small">添加</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">手机同步</span>
+          <p class="hint" id="lan-url-hint">正在获取局域网地址…</p>
+          <p class="hint muted">在手机浏览器打开上面的地址（需与本电脑连接同一 WiFi），即可查看并编辑同一份任务数据；可在浏览器中"添加到主屏幕"，像 App 一样使用。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" data-close-modal>完成</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
