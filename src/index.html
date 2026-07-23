@@ -14,48 +14,133 @@
 </head>
 <body>
   <div id="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-dot"></span>
-        <h1>任务看板</h1>
-      </div>
-
-      <div class="view-switch" role="tablist" aria-label="视图切换">
-        <button class="switch-btn active" data-view="board" role="tab" aria-selected="true">看板</button>
-        <button class="switch-btn" data-view="gantt" role="tab" aria-selected="false">甘特图</button>
-      </div>
-
-      <div class="topbar-actions">
-        <button id="btn-settings" class="btn-ghost" title="人员 / 状态列设置">设置</button>
-        <button id="btn-new-task" class="btn-primary">+ 新建任务</button>
-      </div>
-    </header>
-
-    <div id="sync-banner" class="sync-banner hidden"></div>
-
-    <main>
-      <!-- 看板视图 -->
-      <section id="view-board" class="view-panel active">
-        <div id="board-columns" class="board-columns"></div>
-      </section>
-
-      <!-- 甘特图视图 -->
-      <section id="view-gantt" class="view-panel">
-        <div class="gantt-toolbar">
-          <button id="gantt-prev" class="btn-ghost small">‹ 上一段</button>
-          <div id="gantt-range-label" class="gantt-range-label"></div>
-          <button id="gantt-next" class="btn-ghost small">下一段 ›</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">我</div>
+        <div class="user-meta">
+          <p class="user-name" id="user-name">我自己</p>
+          <p class="user-dept" id="user-dept">点击设置填写部门</p>
         </div>
-        <div id="gantt-wrap" class="gantt-wrap">
-          <div id="gantt-chart" class="gantt-chart"></div>
+        <button id="btn-collapse-sidebar" class="btn-icon" title="收起侧边栏"><span>‹</span></button>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-title">文件夹</p>
+        <div id="folder-list" class="sidebar-list"></div>
+        <button id="btn-add-folder" class="sidebar-add">+ 新建文件夹</button>
+      </div>
+
+      <div class="sidebar-section sidebar-grow">
+        <p class="sidebar-title">标签</p>
+        <div id="tag-filter-list" class="sidebar-list"></div>
+      </div>
+
+      <button id="btn-archive-folder" class="sidebar-archive">已完成归档</button>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="topbar">
+        <button id="btn-expand-sidebar" class="btn-icon hidden" title="展开侧边栏"><span>›</span></button>
+
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="搜索标题、备注" />
         </div>
-      </section>
-    </main>
+        <button id="btn-filter" class="btn-ghost small">筛选</button>
+
+        <div class="view-switch" role="tablist" aria-label="视图切换">
+          <button class="switch-btn active" data-view="board" role="tab" aria-selected="true">看板</button>
+          <button class="switch-btn" data-view="gantt" role="tab" aria-selected="false">甘特图</button>
+          <button class="switch-btn" data-view="calendar" role="tab" aria-selected="false">日历</button>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="btn-batch-mode" class="btn-ghost small" title="批量选择">批量</button>
+          <button id="btn-pin" class="btn-icon" title="窗口置顶">📌</button>
+          <button id="btn-settings" class="btn-ghost small">设置</button>
+          <button id="btn-new-task" class="btn-primary">+ 新建任务</button>
+        </div>
+      </header>
+
+      <div id="filter-panel" class="filter-panel hidden">
+        <div class="filter-row">
+          <span class="filter-label">优先级</span>
+          <div id="filter-priority" class="chip-group small"></div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">状态</span>
+          <div id="filter-status" class="chip-group small"></div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">标签</span>
+          <div id="filter-tags" class="chip-group small"></div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">截止日期</span>
+          <input type="date" id="filter-date-from" />
+          <span class="filter-sep">至</span>
+          <input type="date" id="filter-date-to" />
+        </div>
+        <button id="btn-clear-filter" class="btn-ghost small">清除筛选</button>
+      </div>
+
+      <div id="overdue-banner" class="overdue-banner hidden"></div>
+      <div id="sync-banner" class="sync-banner hidden"></div>
+
+      <main>
+        <section id="view-board" class="view-panel active">
+          <div id="board-columns" class="board-columns"></div>
+        </section>
+
+        <section id="view-gantt" class="view-panel">
+          <div class="gantt-toolbar">
+            <button id="gantt-prev" class="btn-ghost small">‹ 上一段</button>
+            <div id="gantt-range-label" class="gantt-range-label"></div>
+            <button id="gantt-next" class="btn-ghost small">下一段 ›</button>
+          </div>
+          <div id="gantt-wrap" class="gantt-wrap">
+            <div id="gantt-chart" class="gantt-chart"></div>
+          </div>
+        </section>
+
+        <section id="view-calendar" class="view-panel">
+          <div class="calendar-toolbar">
+            <button id="cal-prev" class="btn-ghost small">‹</button>
+            <div id="cal-label" class="gantt-range-label"></div>
+            <button id="cal-next" class="btn-ghost small">›</button>
+            <div class="cal-mode-switch">
+              <button class="cal-mode-btn" data-mode="year">年</button>
+              <button class="cal-mode-btn active" data-mode="month">月</button>
+              <button class="cal-mode-btn" data-mode="week">周</button>
+            </div>
+          </div>
+          <div id="calendar-body" class="calendar-body"></div>
+          <div id="calendar-day-detail" class="calendar-day-detail hidden"></div>
+        </section>
+      </main>
+
+      <div id="batch-bar" class="batch-bar hidden">
+        <span id="batch-count"></span>
+        <label class="batch-action">改截止日期 <input type="date" id="batch-due-date" /></label>
+        <label class="batch-action">转移分组
+          <select id="batch-status-select"></select>
+        </label>
+        <button id="batch-complete" class="btn-ghost small">标记完成</button>
+        <button id="batch-delete" class="btn-danger small">批量删除</button>
+        <button id="batch-cancel" class="btn-ghost small">取消选择</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 任务新建/编辑弹窗 -->
+  <div id="context-menu" class="context-menu hidden">
+    <button data-action="edit">编辑</button>
+    <button data-action="duplicate">复制</button>
+    <button data-action="postpone">延期一天</button>
+    <button data-action="archive">归档</button>
+    <button data-action="delete" class="danger">删除</button>
+  </div>
+
   <div id="task-modal" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal wide">
       <div class="modal-header">
         <h2 id="task-modal-title">新建任务</h2>
         <button class="btn-icon" data-close-modal>✕</button>
@@ -76,6 +161,10 @@
             <span class="field-label">截止日期</span>
             <input type="date" id="f-due" />
           </label>
+          <label class="field">
+            <span class="field-label">截止时间（可选，用于精确提醒）</span>
+            <input type="time" id="f-due-time" />
+          </label>
         </div>
 
         <div class="field">
@@ -93,14 +182,50 @@
         </div>
 
         <div class="field">
+          <span class="field-label">所属文件夹</span>
+          <select id="f-folder"></select>
+        </div>
+
+        <div class="field">
+          <span class="field-label">标签（可多选，可在设置中新增）</span>
+          <div id="f-tags-group" class="chip-group"></div>
+        </div>
+
+        <div class="field">
           <span class="field-label">协作人（勾选，可在设置中添加）</span>
           <div id="f-people-group" class="checkbox-group"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <span class="field-label">重复</span>
+            <select id="f-recurrence">
+              <option value="">不重复</option>
+              <option value="daily">每天</option>
+              <option value="weekly">每周</option>
+              <option value="monthly">每月</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="field-label">到期提醒（需设置截止时间）</span>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" id="f-remind-10" value="10" /> 提前10分钟</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-remind-60" value="60" /> 提前1小时</label>
+              <label class="checkbox-item"><input type="checkbox" id="f-remind-1440" value="1440" /> 提前1天</label>
+            </div>
+          </div>
         </div>
 
         <label class="field">
           <span class="field-label">进展说明（可选，最多 1000 字）</span>
           <textarea id="f-notes" rows="3" maxlength="1000" placeholder="记录当前任务进展…"></textarea>
         </label>
+
+        <div class="field">
+          <span class="field-label">子任务（甘特图中会作为分支线显示）</span>
+          <div id="f-subtasks-list" class="subtasks-editor"></div>
+          <button type="button" id="btn-add-subtask" class="btn-ghost small">+ 添加子任务</button>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -112,14 +237,21 @@
     </div>
   </div>
 
-  <!-- 设置弹窗：人员 & 状态列 -->
   <div id="settings-modal" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal wide">
       <div class="modal-header">
         <h2>设置</h2>
         <button class="btn-icon" data-close-modal>✕</button>
       </div>
       <div class="modal-body">
+        <div class="field">
+          <span class="field-label">我的信息</span>
+          <div class="field-row">
+            <input type="text" id="settings-username" placeholder="姓名" maxlength="20" />
+            <input type="text" id="settings-userdept" placeholder="部门 / 职务" maxlength="30" />
+          </div>
+        </div>
+
         <div class="field">
           <span class="field-label">协作人名单</span>
           <div id="people-list" class="tag-list"></div>
@@ -130,11 +262,50 @@
         </div>
 
         <div class="field">
-          <span class="field-label">看板状态列（顺序即看板列顺序）</span>
+          <span class="field-label">看板状态列（最多 6 列，可自定义颜色）</span>
           <div id="columns-list" class="tag-list"></div>
           <div class="inline-add">
             <input type="text" id="new-column" placeholder="例如：验收中" maxlength="12" />
+            <input type="color" id="new-column-color" value="#378ADD" />
             <button id="add-column" class="btn-ghost small">添加</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">标签管理</span>
+          <div id="tags-manage-list" class="tag-list"></div>
+          <div class="inline-add">
+            <input type="text" id="new-tag" placeholder="标签名称" maxlength="12" />
+            <input type="color" id="new-tag-color" value="#1D9E75" />
+            <button id="add-tag" class="btn-ghost small">添加</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">文件夹管理</span>
+          <div id="folders-manage-list" class="tag-list"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">到期提醒</span>
+          <label class="checkbox-item"><input type="checkbox" id="settings-notify-enabled" /> 允许桌面通知提醒（首次开启会请求系统通知权限）</label>
+        </div>
+
+        <div class="field">
+          <span class="field-label">数据备份 / 迁移</span>
+          <div class="inline-add">
+            <button id="btn-export-xlsx" class="btn-ghost small">导出为 Excel</button>
+            <label class="btn-ghost small file-btn">导入 Excel<input type="file" id="btn-import-xlsx" accept=".xlsx" hidden /></label>
+          </div>
+          <div class="field-row" style="margin-top:8px;">
+            <label class="field">
+              <span class="field-label">导出范围（留空为全部）</span>
+            </label>
+          </div>
+          <div class="inline-add">
+            <input type="date" id="export-date-from" />
+            <span class="filter-sep">至</span>
+            <input type="date" id="export-date-to" />
           </div>
         </div>
 
@@ -150,6 +321,7 @@
     </div>
   </div>
 
+  <script src="vendor/xlsx.core.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
