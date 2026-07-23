@@ -45,7 +45,7 @@ kanban-app/
 5. 打包好的安装包在 `src-tauri/target/release/bundle/dmg/` 目录下，是一个 `.dmg` 文件，双击打开后把里面的 App 拖进「应用程序」文件夹即可。
 6. 因为没有 Apple 开发者签名，第一次打开时系统可能提示"无法验证开发者"——去「系统设置 → 隐私与安全性」，下滑找到这个 App，点"仍要打开"即可，只需要做一次。
 
-## 打包安装包 —— 在 Windows 上（生成 .msi / .exe）
+## 打包安装包 —— 在 Windows 上（生成 .exe）
 
 **这几步必须在真正的 Windows 电脑上做**，同样是因为 Tauri 不支持交叉编译。
 
@@ -56,7 +56,7 @@ kanban-app/
    npm install
    npm run build
    ```
-4. 打包好的安装包在 `src-tauri\target\release\bundle\` 下：`msi\` 里是 `.msi`，`nsis\` 里是 `.exe`，装哪个都行，双击运行即可。
+4. 打包好的安装包在 `src-tauri\target\release\bundle\nsis\` 下，是一个 `.exe` 文件，双击运行即可。
 5. 因为没有微软签名证书，Windows Defender SmartScreen 可能弹"Windows 已保护你的电脑"——点"更多信息"，再点"仍要运行"即可，只需要做一次。
 
 ## 开发模式（不打包，直接跑起来看效果）
@@ -65,7 +65,7 @@ kanban-app/
 
 ## 后续如果想省事：用 GitHub Actions 自动打包
 
-仓库里已经配好 `.github/workflows/build.yml`。如果以后方便注册一个免费 GitHub 账号、把项目传上去，在仓库的 Actions 页面点一下 "Run workflow"，几分钟后会在 Releases 里自动生成 Mac 的 `.dmg` 和 Windows 的 `.msi`/`.exe`，不需要自己准备两台电脑、也不需要装 Node/Rust。上传代码可以直接在 GitHub 网页上用 "Add file → Upload files" 拖文件夹，不需要懂命令行。
+仓库里已经配好 `.github/workflows/build.yml`。如果以后方便注册一个免费 GitHub 账号、把项目传上去，在仓库的 Actions 页面点一下 "Run workflow"，几分钟后会在 Releases 里自动生成 Mac 的 `.dmg` 和 Windows 的 `.exe`，不需要自己准备两台电脑、也不需要装 Node/Rust。上传代码可以直接在 GitHub 网页上用 "Add file → Upload files" 拖文件夹，不需要懂命令行。
 
 ## 数据 / 备份
 
