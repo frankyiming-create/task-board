@@ -1,0 +1,15 @@
+{
+  "name": "task-board",
+  "private": true,
+  "version": "0.1.0",
+  "description": "个人任务看板 - 看板/甘特图双视图，结构化录入，桌面应用内置局域网同步服务",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "icon": "tauri icon icons/app-icon.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  }
+}
